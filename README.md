@@ -50,3 +50,14 @@ You can run all of the supported Angular CLI commands. More details at [Angular 
 # Additional features
 Also running [ckeditor 5](https://ckeditor.com/ckeditor-5/) and [filepond](https://pqina.nl/filepond/) 
 
+# Interface
+![Interface](https://raw.githubusercontent.com/alkgreer/Issue-Tracking-System/master/mainInterface.png)
+![Interface](https://raw.githubusercontent.com/alkgreer/Issue-Tracking-System/master/noteInterface.png)
+![Interface](https://raw.githubusercontent.com/alkgreer/Issue-Tracking-System/master/userInterface.png)
+![Interface](https://raw.githubusercontent.com/alkgreer/Issue-Tracking-System/master/groupInterface.png)
+![Interface](https://raw.githubusercontent.com/alkgreer/Issue-Tracking-System/master/pcInterface.png)
+![Interface](https://raw.githubusercontent.com/alkgreer/Issue-Tracking-System/master/inventoryInterface.png)
+![Interface](https://raw.githubusercontent.com/alkgreer/Issue-Tracking-System/master/categoryInterface.png)
+![Interface](https://raw.githubusercontent.com/alkgreer/Issue-Tracking-System/master/relatedInterface.png)
+![Interface](https://raw.githubusercontent.com/alkgreer/Issue-Tracking-System/master/historyInterface.png)
+
