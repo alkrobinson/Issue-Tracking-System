@@ -1,0 +1,612 @@
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+<ngx-loading [show]="loading"></ngx-loading>
+<ng-container *ngIf="!loading">
+  <igx-tabs #tabGroup tabsType="fixed">
+    <ng-container *ngIf="issuePk === 'new_issue'">
+      <!--IF NEW ISSUE-->
+      <igx-tabs-group label="General" icon="assignment">
+        <br />
+        <h1 style="font-size:xx-large;line-height: 0rem;text-align: center">Issue</h1>
+        <hr style="max-width: initial;" />
+        <div style="width: 700px;margin: auto">
+          <!-- NEW SUBJECT-->
+
+          <igx-input-group>
+            <label igxLabel for="subject">Subject</label>
+            <input igxInput #newSubject type="text" maxlength="50" />
+            <igx-prefix>
+              <igx-icon>subject</igx-icon>
+            </igx-prefix>
+          </igx-input-group>
+
+          <!--NEW USERS-->
+          <ng-container *ngIf="userPermissions.includes('User Role Management')">
+            <label igxLabel>
+              <igx-icon>supervised_user_circle</igx-icon> Add Users(optional):
+            </label>
+            <br />
+            <br />
+            <igx-combo #newUser [data]="allUsers" [displayKey]="'name'" [valueKey]="'pk'" placeholder="User(s)"
+              searchPlaceholder="Search..." [filterable]="true" [itemsMaxHeight]="200"
+              (onClosing)="newUsers = newUser.selectedItems()">
+            </igx-combo>
+          </ng-container>
+          <!--NEW GROUPS-->
+          <ng-container *ngIf="userPermissions.includes('Group Role Management')">
+            <label igxLabel for="newGroups">
+              <igx-icon>groups</igx-icon> Add Groups(optional):
+            </label>
+            <br />
+            <br />
+            <igx-combo #newGroup [data]="allGroups" [displayKey]="'name'" [valueKey]="'pk'" placeholder="Group(s)"
+              searchPlaceholder="Search..." [filterable]="true" [itemsMaxHeight]="200"
+              (onClosing)="newGroups = newGroup.selectedItems()">
+            </igx-combo>
+          </ng-container>
+          <!--NEW PCS-->
+          <ng-container *ngIf="userPermissions.includes('PC Assignment')">
+            <label igxLabel for="newPcs">
+              <igx-icon>computer</igx-icon> Add Pcs(optional):
+            </label>
+            <br />
+            <br />
+            <igx-combo #newPc [data]="allPcs" [displayKey]="'search'" [valueKey]="'id'" placeholder="Pc(s)"
+              searchPlaceholder="Search..." [filterable]="true" [itemsMaxHeight]="200"
+              (onClosing)="newPcs = newPc.selectedItems()">
+            </igx-combo>
+          </ng-container>
+          <!--NEW CATEGORY-->
+          <ng-container *ngIf="userPermissions.includes('Category Assignment')">
+            <label igxLabel for="newCategories">
+              <igx-icon>folder</igx-icon> Add Categories(optional):
+            </label>
+            <br />
+            <br />
+            <igx-combo #newCategory [data]="allCategories" [displayKey]="'name'" [valueKey]="'pk'"
+              placeholder="Category(s)" searchPlaceholder="Search..." [filterable]="true" [itemsMaxHeight]="200"
+              (onClosing)="newCategories = newCategory.selectedItems()">
+            </igx-combo>
+          </ng-container>
+          <!--NEW DEPARTMENT-->
+          <ng-container *ngIf="userPermissions.includes('Department Management')">
+            <label igxLabel for="newDepartments">
+              <igx-icon>folder</igx-icon> Add Departments(optional):
+            </label>
+            <br />
+            <br />
+            <igx-combo #newDepartment [data]="allDepartments" [displayKey]="'name'" [valueKey]="'pk'"
+              placeholder="Department(s)" searchPlaceholder="Search..." [filterable]="true" [itemsMaxHeight]="200"
+              (onClosing)="newDepartments = newDepartment.selectedItems()">
+            </igx-combo>
+          </ng-container>
+
+          <br />
+          <igx-date-picker #newDate label="Due
+          Date(optional):" [disabledDates]="disabledDates">
+          </igx-date-picker>
+          <br>
+          <file-pond #myPond [options]="pondOptions"></file-pond>
+
+          <label igxLabel>
+            <igx-icon>edit</igx-icon> Issue Details:
+          </label>
+          <br />
+          <br />
+          <ckeditor style="height: 500px" #newEditor [editor]="Editor" [config]="config">
+          </ckeditor>
+          <br />
+          <button style="float: right; margin-right: 50%" igxButton="raised" type="submit" (click)="onNewIssueSubmit([newSubject, newUsers, newGroups, newPcs,
+          newCategories, newDepartments, newDate, newEditor])">
+            Submit
+          </button>
+          <br />
+          <br />
+          <br />
+          <br />
+        </div>
+      </igx-tabs-group>
+    </ng-container>
+
+    <ng-container *ngIf="issuePk !== 'new_issue'">
+      <!--IF EXISTING ISSUE-->
+
+      <igx-tabs-group label="General" icon="assignment">
+        <br />
+        <h1 style="font-size:xx-large;line-height: 0rem;text-align: center">Issue</h1>
+        <hr style="max-width: initial;" />
+        <div style="width: 700px;margin: auto">
+          <!-- NEW SUBJECT-->
+
+          <igx-input-group>
+            <label igxLabel for="subject">Subject</label>
+            <input igxInput #subject type="text" maxlength="50" (change)="newSubject = $event"
+              [value]="issueData[0].subject" />
+            <igx-prefix>
+              <igx-icon>subject</igx-icon>
+            </igx-prefix>
+          </igx-input-group>
+          <br />
+
+          <!-- Priority-->
+
+          <ng-container *ngIf="userPermissions.includes('View Priority')">
+            <ng-container *ngIf="userPermissions.includes('Change Priority')">
+              <igx-select #prioritySelect id="prioritySelect" name="priority" [value]="issueData[0].priority"
+                (onSelection)="checkPriority($event)">
+                <label igxLabel>Priority:</label>
+                <igx-select-item *ngFor="let priority of priorityData" [id]="priority.pk" [value]="priority.pk">
+                  {{ priority.name }}
+                </igx-select-item>
+                <igx-prefix>
+                  <igx-icon>priority_high</igx-icon>
+                </igx-prefix>
+              </igx-select>
+            </ng-container>
+
+            <ng-container *ngIf="!userPermissions.includes('Change Priority')">
+              <igx-select disabled="true" id="prioritySelect" name="priority" [value]="issueData[0].priority">
+                <label igxLabel>Priority:</label>
+                <igx-select-item *ngFor="let priority of priorityData" [value]="priority.Pk">
+                  {{ priority.Name }}
+                </igx-select-item>
+                <igx-prefix>
+                  <igx-icon>priority_high</igx-icon>
+                </igx-prefix>
+              </igx-select>
+            </ng-container>
+          </ng-container>
+
+          <!-- Status-->
+
+          <ng-container *ngIf="userPermissions.includes('Change Status')">
+            <igx-select id="statusSelect" name="status" [value]="issueData[0].status"
+              (onSelection)="checkStatus($event)">
+              <label igxLabel>Status:</label>
+              <igx-select-item *ngFor="let status of statusData" [id]="status.pk" [value]="status.pk">
+                {{ status.name }}
+              </igx-select-item>
+              <igx-prefix>
+                <igx-icon>access_time</igx-icon>
+              </igx-prefix>
+            </igx-select>
+          </ng-container>
+          <ng-container *ngIf="!userPermissions.includes('Change Status')">
+            <igx-select id="statusSelect" disabled="true" [value]="issueData[0].status">
+              <label igxLabel>Status:</label>
+              <igx-select-item *ngFor="let status of statusData" [id]="status.pk" [value]="status.pk">
+                {{ status.name }}
+              </igx-select-item>
+              <igx-prefix>
+                <igx-icon>access_time</igx-icon>
+              </igx-prefix>
+            </igx-select>
+          </ng-container>
+
+          <!-- Due Date-->
+
+          <igx-date-picker #dueDate name="dueDate" label="Due Date(optional):" [value]="issueData[0].dueDate"
+            [disabledDates]="disabledDates">
+          </igx-date-picker>
+          <br />
+          <!-- Created Date-->
+
+          <igx-date-picker [disabled]="true" #createdDate name="createdDate" label="Created Date:"
+            [value]="issueData[0].createdDate">
+          </igx-date-picker>
+          <br />
+          <!-- Updated Date-->
+
+          <igx-date-picker [disabled]="true" #updatedDate name="updatedDate" label="Updated Date:"
+            [value]="issueData[0].updatedDate">
+          </igx-date-picker>
+
+
+          <br>
+          <igx-date-picker [hidden]="existStatus === 7 ? false : true" #resumeDate id="resumeDate" label="Resume Date:"
+            [value]="issueData[0].resumeDate" [disabledDates]="disabledDates">
+          </igx-date-picker>
+
+          <label igxLabel>
+            <igx-icon>supervised_user_circle</igx-icon> Assigned Users:
+          </label>
+          <br />
+          <br />
+          <textarea readonly [value]="assignedUsersName ? assignedUsersName : 'UNASSIGNED'"></textarea>
+
+          <label igxLabel>
+            <igx-icon>group</igx-icon> Assigned Groups:
+          </label>
+          <br />
+          <br />
+          <textarea readonly [value]="assignedGroupsName ? assignedGroupsName : 'UNASSIGNED'"></textarea>
+
+          <label igxLabel>
+            <igx-icon>computer</igx-icon> Assigned Pcs:
+          </label>
+          <br />
+          <br />
+          <textarea readonly [value]="assignedPcsName ? assignedPcsName :
+          'UNASSIGNED' "></textarea>
+
+
+          <label igxLabel>
+            <igx-icon>edit</igx-icon> Issue Details:
+          </label>
+          <br />
+          <br />
+          <ckeditor style="height: 500px" #existIssueEditor [editor]="Editor" [config]="config"
+            (change)="content = $event" [data]="issueData[0].details">
+          </ckeditor>
+          <br />
+          <button style="float: right; margin-right: 50%" igxButton="raised" type="submit" (click)="onExistingIssueSubmit([subject, dueDate, resumeDate,
+          existIssueEditor])" [disabled]="(closedIssue && !isAssignee)? true : false">
+            Submit
+          </button>
+        </div>
+      </igx-tabs-group>
+
+      <igx-tabs-group label="Notes" icon="create">
+        <br />
+        <h1 style="font-size:xx-large;line-height: 0rem;text-align: center">Notes</h1>
+        <hr style="max-width: initial;" />
+        <div style="width: 700px;margin: auto">
+          <ng-container *ngIf="userPermissions.includes('Add Private Notes')">
+            <igx-checkbox style="margin: auto;text-align: center;display:
+            block" [checked]="false" #privte>
+              private note
+            </igx-checkbox>
+          </ng-container>
+          <ckeditor style="height: 900px" #noteIssueEditor [editor]="Editor" [config]="config">
+          </ckeditor>
+          <br>
+          <button style="margin: auto;display: block" igxButton="raised" type="submit"
+            (click)="addNote(noteIssueEditor) " [disabled]="(closedIssue && !isAssignee)? true : false">
+            Submit
+          </button>
+          <br>
+          <file-pond #myPond [options]="pondOptions">
+          </file-pond>
+
+          <div style="margin: auto;text-align: center">
+
+            <mat-list style="background-color: #EFEFEF" *ngIf="issueFiles.length > 0">
+              <h5 style="text-decoration: underline">Imported Files</h5>
+              <ng-container *ngFor="let file of issueFiles; let i = index">
+
+                <mat-list-item><a style="padding-right: 10px" target="_blank" href={{file.fileLink}}
+                    [innerHTML]="issueFileData[i].fullInfo"></a>
+                  <button class="btn" (click)="removeFile(file.fkFile)"><a><i style="color: red"
+                        class="fa fa-trash"></i></a></button>
+                </mat-list-item>
+              </ng-container>
+
+            </mat-list>
+
+          </div>
+
+
+          <br />
+
+          <br>
+          <br>
+          <ng-container *ngIf="issueNoteData.length > 0">
+            <h5 style="margin: auto;text-align: center">Notes:</h5>
+            <hr style="max-width: initial;" />
+            <ng-container *ngFor="let note of issueNoteData; let i = index">
+              <div *ngIf="note.private">
+                <ng-container *ngIf="userPermissions.includes('Add Private Notes')">
+                  <div *ngIf="i % 2 == 0" style="background-color: antiquewhite">
+                    <p style="font-size: large">
+                      <strong>{{ note.displayName }}({{ note.createdDate }}){{ note.private }}:</strong>
+                    </p>
+                    <div [innerHTML]="note.note"></div>
+                    <hr style="max-width: initial;" />
+                  </div>
+
+                  <div *ngIf="i % 2 != 0" style="background-color: aliceblue">
+                    <p style="font-size: large">
+                      <strong>{{ note.displayName }}({{ note.createdDate }}){{ note.private }}:</strong>
+                    </p>
+                    <div [innerHTML]="note.note"></div>
+                    <hr style="max-width: initial;" />
+                  </div>
+
+                </ng-container>
+              </div>
+              <div *ngIf="!note.private">
+                <div *ngIf="i % 2 == 0" style="background-color: antiquewhite">
+                  <p style="font-size: large">
+                    <strong>{{ note.displayName }}({{ note.createdDate }}){{ note.private }}:</strong>
+                  </p>
+                  <div [innerHTML]="note.note"></div>
+                  <hr style="max-width: initial;" />
+                </div>
+
+                <div *ngIf="i % 2 != 0" style="background-color: aliceblue">
+                  <p style="font-size: large">
+                    <strong>{{ note.displayName }}({{ note.createdDate }}){{ note.private }}:</strong>
+                  </p>
+                  <div [innerHTML]="note.note"></div>
+                  <hr style="max-width: initial;" />
+                </div>
+
+              </div>
+            </ng-container>
+
+          </ng-container>
+
+
+        </div>
+      </igx-tabs-group>
+
+      <ng-container *ngIf="userPermissions.includes('User Role Management')">
+        <igx-tabs-group label="Users" icon="supervised_user_circle">
+          <br />
+          <h1 style="font-size:xx-large;line-height: 0rem;text-align: center">Users</h1>
+          <hr style="max-width: initial;" />
+          <div style="text-align: center">
+            <igx-combo #addUser style="display: inline-block; padding-right: 20px" [width]="'max-content'"
+              [itemsWidth]="'max-content'" name="addUsers" [data]="allUsers" [displayKey]="'name'" [valueKey]="'pk'"
+              placeholder="User(s)" searchPlaceholder="Search..." [filterable]="true" [itemsMaxHeight]="200">
+            </igx-combo>
+            <igx-combo style="display: inline-block" #addUserRle (onSelectionChange)="addUserRle.close()"
+              [width]="'max-content'" [itemsWidth]="'max-content'" [data]="roleData" [displayKey]="'name'"
+              [valueKey]="'pk'" placeholder="Roles" searchPlaceholder="Search..." [filterable]="true"
+              [itemsMaxHeight]="200" (onOpening)="addUserRle ? addUserRle.value ?
+                                      deselect(addUserRle, addUserRole) : ''  : ''">
+            </igx-combo>
+          </div>
+
+          <button style="margin: auto;display: block" igxButton="raised" type="submit"
+            (click)="checkAssigned('user', addUser, addUserRle)"
+            [disabled]="(closedIssue && !isAssignee)? true : false">
+            Add New User
+          </button>
+          <br>
+          <igx-grid style="margin: auto" [width]="'80%'" #userGrid [data]="issueUsersData" [allowFiltering]="true"
+            [paging]="true" [height]="'auto'">
+            <igx-column field="displayName" [sortable]="true" header="Name"></igx-column>
+            <igx-column field="roleName" [sortable]="true" header="Role"></igx-column>
+            <igx-column field="Active" [sortable]="true" header="Active" [dataType]="'boolean'">
+              <ng-template igxCell let-cell="cell" let-val>
+                <img *ngIf='val != 1' src="https://www.infragistics.com/angular-demos/assets/images/grid/expired.png"
+                  title="Not Ldap" alt="false" />
+                <img *ngIf='val == 1' src="https://www.infragistics.com/angular-demos/assets/images/grid/active.png"
+                  title="Ldap" alt="true" />
+              </ng-template>
+            </igx-column>
+            <igx-column field="userPk" [sortable]="true" header="Remove">
+              <ng-template igxCell let-cell="cell" let-val>
+                <button igxButton="icon" (click)="removeAssigned('removeUsers',
+                val, $event)" [disabled]="(closedIssue && !isAssignee)? true : false">
+                  <igx-icon>delete</igx-icon>
+                </button>
+              </ng-template>
+            </igx-column>
+          </igx-grid>
+        </igx-tabs-group>
+
+      </ng-container>
+
+      <ng-container *ngIf="userPermissions.includes('Group Role Management')">
+        <igx-tabs-group label="Groups" icon="group">
+          <br />
+          <h1 style="font-size:xx-large;line-height: 0rem;text-align: center">Groups</h1>
+          <hr style="max-width: initial;" />
+          <div style="text-align: center">
+            <igx-combo style="display: inline-block; padding-right: 20px" #addGroup [width]="'fit-content'"
+              [itemsWidth]="'max-content'" [data]="allGroups" [displayKey]="'name'" [valueKey]="'pk'"
+              placeholder="Group(s)" searchPlaceholder="Search..." [filterable]="true" [itemsMaxHeight]="200">
+            </igx-combo>
+            <igx-combo style="display: inline-block" #addGroupRle (onSelectionChange)="addGroupRle.close()"
+              [width]="'max-content'" [itemsWidth]="'max-content'" [data]="roleData" [displayKey]="'name'"
+              [valueKey]="'pk'" placeholder="Roles" searchPlaceholder="Search..." [filterable]="true"
+              [itemsMaxHeight]="200" (onOpening)="addGroupRle ? addGroupRle.value ?
+                          deselect(addGroupRle, addGroupRole) : ''  : ''">
+            </igx-combo>
+          </div>
+
+          <button style="margin: auto;display: block" igxButton="raised" type="submit"
+            (click)="checkAssigned('groups', addGroup, addGroupRle)"
+            [disabled]="(closedIssue && !isAssignee)? true : false">
+            Add New Group
+          </button>
+          <br>
+          <igx-grid style="margin: auto" [width]="'80%'" #groupGrid [data]="issueGroupData" [allowFiltering]="true"
+            [paging]="true" [height]="'auto'">
+            <igx-column field="name" [sortable]="true" header="Name"></igx-column>
+            <igx-column field="roleName" [sortable]="true" header="Role"></igx-column>
+            <igx-column field="groupPk" [sortable]="true" header="Remove">
+              <ng-template igxCell let-cell="cell" let-val>
+                <button igxButton="icon" (click)="removeAssigned('removeGroups',
+                val, $event)" [disabled]="(closedIssue && !isAssignee)? true : false">
+                  <igx-icon>delete</igx-icon>
+                </button>
+              </ng-template>
+            </igx-column>
+          </igx-grid>
+        </igx-tabs-group>
+
+      </ng-container>
+
+      <ng-container *ngIf="userPermissions.includes('PC Assignment')">
+        <igx-tabs-group label="Pcs" icon="computer">
+          <br />
+          <h1 style="font-size:xx-large;line-height: 0rem;text-align: center">Pcs</h1>
+          <hr style="max-width: initial;" />
+          <div style="text-align: center">
+            <igx-combo style="display: inline-block; padding-right: 20px" #addPc [width]="'max-content'"
+              [itemsWidth]="'max-content'" [data]="allPcs" [displayKey]="'search'" [valueKey]="'id'" placeholder="Pc(s)"
+              searchPlaceholder="Search..." [filterable]="true" [itemsMaxHeight]="200">
+            </igx-combo>
+          </div>
+
+          <button style="margin: auto;display: block" igxButton="raised" type="submit"
+            (click)="checkAssigned('pc', addPc)" [disabled]="(closedIssue && !isAssignee)? true : false">
+            Add New Pc
+          </button>
+          <br>
+          <igx-grid style="margin: auto" [width]="'80%'" #pcGrid [data]="issuePcData" [allowFiltering]="true"
+            [paging]="true" [height]="'auto'">
+            <igx-column field="title" [sortable]="true" header="Name"></igx-column>
+            <igx-column field="login" [sortable]="true" header="PC Login">
+            </igx-column>
+            <igx-column field="pcPk" [sortable]="true" header="Remove">
+              <ng-template igxCell let-cell="cell" let-val>
+                <button igxButton="icon" (click)="removeAssigned('removePcs',
+                val)" [disabled]="(closedIssue && !isAssignee)? true : false">
+                  <igx-icon>delete</igx-icon>
+                </button>
+              </ng-template>
+            </igx-column>
+          </igx-grid>
+        </igx-tabs-group>
+
+      </ng-container>
+
+      <ng-container *ngIf="userPermissions.includes('Inventory Viewer')">
+        <igx-tabs-group label="Inventory" icon="format_list_numbered">
+          <br />
+          <h1 style="font-size:xx-large;line-height: 0rem;text-align: center">Parts</h1>
+          <hr style="max-width: initial;" />
+          <button style="margin: auto;display: block" igxButton="raised" type="submit" (click)="newPart.open()"
+            [disabled]="(closedIssue && !isAssignee)? true : false">
+            Add New Part
+          </button>
+          <br>
+          <igx-grid style="margin: auto" [width]="'80%'" #partGrid [data]="issuePartData" [allowFiltering]="true"
+            [paging]="true" [height]="'auto'">
+            <igx-column field="name" [sortable]="true" header="Part Name"></igx-column>
+            <igx-column field="pcName" [sortable]="true" header="PC Name">
+            </igx-column>
+            <igx-column field="unitPk" [sortable]="true" header="Remove">
+              <ng-template igxCell let-cell="cell" let-val>
+                <button igxButton="icon" (click)="removeAssigned('removeParts',
+                val)" [disabled]="(closedIssue && !isAssignee)? true : false">
+                  <igx-icon>delete</igx-icon>
+                </button>
+              </ng-template>
+            </igx-column>
+          </igx-grid>
+        </igx-tabs-group>
+        <igx-dialog #newPart title="Add Part" [closeOnOutsideSelect]="true" (onClose)="partForm.reset()">
+          <form #partForm (ngSubmit)="addPart()" [formGroup]="part">
+            <igx-select #partSelect [placeholder]="'Pick Part'" formControlName="partPk">
+              <igx-prefix>
+                <igx-icon>build</igx-icon>
+              </igx-prefix>
+              <igx-select-item *ngFor="let part of allPartData" [value]="part">
+                {{part.title}}
+              </igx-select-item>
+            </igx-select>
+            <igx-select #pcSelect [placeholder]="'Pick Pc'" formControlName="pcPk">
+              <igx-prefix>
+                <igx-icon>computer</igx-icon>
+              </igx-prefix>
+              <igx-select-item *ngFor="let pc of allPcs" [value]="pc.id">
+                {{pc.search}}
+              </igx-select-item>
+            </igx-select>
+            <button style="margin:auto;display:block" igxButton="raised" type="submit"
+              [disabled]="!part.valid">Submit</button>
+          </form>
+        </igx-dialog>
+
+      </ng-container>
+
+
+      <ng-container *ngIf="userPermissions.includes('Category Assignment')">
+        <igx-tabs-group label="Categories" icon="category">
+          <br />
+          <h1 style="font-size:xx-large;line-height: 0rem;text-align: center">Categories</h1>
+          <hr style="max-width: initial;" />
+          <igx-combo style="margin: auto;display:block" [width]="'max-content'" [itemsWidth]="'max-content'"
+            #addCategory [data]="allCategories" [displayKey]="'name'" [valueKey]="'pk'" placeholder="Category(s)"
+            searchPlaceholder="Search..." [filterable]="true" [itemsMaxHeight]="200">
+          </igx-combo>
+          <br>
+          <button style="margin: auto;display: block" igxButton="raised" type="submit"
+            (click)="checkAssigned('categories', addCategory )" [disabled]="(closedIssue && !isAssignee)? true : false">
+            Add New Category
+          </button>
+          <br>
+          <igx-grid style="margin: auto" [width]="'80%'" #categoryGrid [data]="issueCategoryData"
+            [allowFiltering]="true" [paging]="true" [height]="'auto'">
+            <igx-column field="name" [sortable]="true" header="Category">
+            </igx-column>
+            <igx-column field="relationPk" [sortable]="true" header="Remove">
+              <ng-template igxCell let-cell="cell" let-val>
+                <button igxButton="icon" (click)="removeAssigned('removeCategories', val)"
+                  [disabled]="(closedIssue && !isAssignee)? true : false">
+                  <igx-icon>delete</igx-icon>
+                </button>
+              </ng-template>
+            </igx-column>
+          </igx-grid>
+        </igx-tabs-group>
+
+      </ng-container>
+
+      <igx-tabs-group label="Related Issues" icon="swap_vert">
+        <br />
+        <h1 style="font-size:xx-large;line-height: 0rem;text-align:
+        center">Related Issues</h1>
+        <hr style="max-width: initial;" />
+        <igx-input-group style="width: fit-content; margin:auto">
+          <label igxLabel for="issueNum">Issue Number</label>
+          <input igxInput #relatedIssue type="number" />
+          <igx-prefix>
+            <igx-icon>dialpad</igx-icon>
+          </igx-prefix>
+        </igx-input-group>
+        <br>
+
+        <button style="margin: auto;display: block" igxButton="raised" type="submit"
+          (click)="checkAssigned('issue', relatedIssue )" [disabled]="(closedIssue && !isAssignee)? true : false">
+          Add New Related Issue
+        </button>
+        <br>
+        <igx-grid style="margin: auto" [width]="'80%'" #relationGrid [data]="issueRelationData" [allowFiltering]="true"
+          [paging]="true" [height]="'auto'">
+          <igx-column field="issuePk" [sortable]="true" header="Issue">
+          </igx-column>
+          <igx-column field="relation" [sortable]="true" header="Relation">
+          </igx-column>
+          <igx-column field="relationPk" [sortable]="true" header="Remove">
+            <ng-template igxCell let-cell="cell" let-val>
+              <button igxButton="icon" (click)="removeAssigned('removeRelation',
+              val)" [disabled]="(closedIssue && !isAssignee)? true : false">
+                <igx-icon>delete</igx-icon>
+              </button>
+            </ng-template>
+          </igx-column>
+        </igx-grid>
+      </igx-tabs-group>
+
+
+      <ng-container *ngIf="userPermissions.includes('View Issue History')">
+        <igx-tabs-group label="History" icon="history">
+          <br />
+          <h1 style="font-size:xx-large;line-height: 0rem;text-align: center">History</h1>
+          <hr style="max-width: initial;" />
+          <igx-grid style="margin: auto" [width]="'80%'" #historyGrid [data]="allHistoryData" [allowFiltering]="true"
+            [paging]="true" [height]="'auto'">
+            <igx-column field="userName" [sortable]="true" header="Change Made By">
+            </igx-column>
+            <igx-column field="change" [sortable]="true" header="Item Changed">
+            </igx-column>
+            <igx-column field="value" [sortable]="true" header="Change" [resizable]="true">
+            </igx-column>
+            <igx-column field="time" [sortable]="true" header="Date Changed" [dataType]="'date'"
+              [formatter]='formatDate'>
+            </igx-column>
+
+          </igx-grid>
+        </igx-tabs-group>
+
+      </ng-container>
+
+
+    </ng-container>
+  </igx-tabs>
+</ng-container>

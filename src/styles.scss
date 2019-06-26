@@ -1,0 +1,56 @@
+/* You can add global styles to this file, and also import other style files */
+// Standard CSS normalize, comment out if not required or using a different module
+@import "~minireset.css/minireset";
+@import "../node_modules/foundation-sites/assets/foundation";
+@import "~igniteui-angular/lib/core/styles/themes/index";
+@import '~@angular/material/theming';
+@import '../node_modules/filepond/dist/filepond.min.css';
+@include mat-core();
+
+
+$app-primary: mat-palette($mat-blue, 600);
+$app-accent: mat-palette($mat-blue, 100);
+$app-theme: mat-light-theme($app-primary, $app-accent);
+@include angular-material-theme($app-theme);
+
+$primary: #1779ba !default;
+$secondary: #0e3fa7 !default;
+$app-palette: igx-palette($primary, $secondary);
+@include igx-core();
+@include igx-theme($app-palette);
+
+:root {
+  @include igx-theme($app-palette);
+}
+
+igx-input-group {
+  background: ghostwhite
+}
+
+app-root select {
+  width: auto;
+}
+
+
+:root .igx-input-group__label {
+  font-weight: bold;
+  height: auto;
+}
+
+:root .image {
+  max-height: unset
+}
+
+:root .mat-tab-body.mat-tab-body-active {
+  overflow-y: hidden;
+}
+
+#igx-tabs__group-1>div>ckeditor>div.ck.ck-reset.ck-editor.ck-rounded-corners>div.ck.ck-editor__main>div {
+  height: 500px;
+}
+
+
+
+:root body>div.igx-overlay>div>div {
+  width: max-content;
+}
