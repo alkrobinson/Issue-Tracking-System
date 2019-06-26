@@ -47,6 +47,6 @@ You can run all of the supported Angular CLI commands. More details at [Angular 
 
 
 
-# issueInterface2
+# Additional features
 Also running [ckeditor 5](https://ckeditor.com/ckeditor-5/) and [filepond](https://pqina.nl/filepond/) 
 
